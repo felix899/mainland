@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}潛水套票管理系統{% endblock %}</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'PingFang TC', 'Helvetica Neue', Arial, sans-serif;
+            background: #f17431; /* 外層橘色背景，與截圖相近 */
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .page-wrapper {
+            width: 100%;
+        }
+
+        .header-bar {
+            background: #f17431; /* 橘色區塊 */
+            padding: 10px 0 0 0;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto 10px auto;
+            display: grid;
+            grid-template-columns: var(--header-grid-columns);
+            gap: 10px;
+            --header-grid-columns: 1.3fr 2fr 0.8fr;
+        }
+
+        .header-row-top,
+        .header-row-bottom {
+            display: contents;
+        }
+
+        .header-box {
+            background: #ffffff;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-logo-box {
+            justify-content: flex-start;
+        }
+
+        .logo-placeholder {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-img {
+            display: block;
+            max-height: 90px;
+            height: auto;
+            width: auto;
+        }
+
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #fbb700;
+        }
+
+        .logo-text-main {
+            font-size: 26px;
+            font-weight: bold;
+            color: #0070c0;
+            letter-spacing: 4px;
+        }
+
+        .logo-text-sub {
+            font-size: 14px;
+            color: #f17431;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .main-menu {
+            display: flex;
+            justify-content: space-around;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .main-menu a {
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
+
+        .right-top-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: stretch;
+        }
+
+        .right-top-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid #f0f0f0;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .right-top-cell:first-child {
+            border-left: none;
+        }
+
+        .phone-box {
+            justify-content: flex-start;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .phone-icon {
+            font-size: 22px;
+        }
+
+        .sub-menu {
+            display: flex;
+            justify-content: flex-start;
+            gap: 40px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .cta-box {
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #f17431;
+        }
+
+        .cta-box span {
+            display: inline-block;
+        }
+
+        .social-box {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .social-icon-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            background: #ffffff;
+            padding: 25px 25px 35px 25px;
+        }
+
+        /* 首頁 Hero 輪播區塊 */
+        .hero-carousel {
+            max-width: 1200px;
+            margin: 0 auto 15px auto;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .hero-carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .hero-slide {
+            min-width: 100%;
+            position: relative;
+            display: block;
+            color: inherit;
+            /* 固定 21:9 比例框架 */
+            aspect-ratio: 21 / 9;
+            overflow: hidden;
+        }
+
+        .hero-slide img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover; /* 以裁切方式填滿 21:9 區塊 */
+        }
+
+        .hero-slide-caption {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 10px 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent);
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .hero-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 22px;
+        }
+
+        .hero-nav.prev {
+            left: 10px;
+        }
+
+        .hero-nav.next {
+            right: 10px;
+        }
+
+        .hero-dots {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .hero-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .hero-dot.active {
+            background: #ffffff;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* 手機 / 平板自適應 */
+        @media (max-width: 992px) {
+            .header-inner {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header-row-top,
+            .header-row-bottom {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .header-box {
+                justify-content: center;
+            }
+
+            .logo-placeholder {
+                justify-content: center;
+            }
+
+            .main-menu {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .sub-menu {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .content-wrapper {
+                padding: 18px 15px 25px 15px;
+            }
+
+            .logo-text-main {
+                font-size: 20px;
+            }
+
+            .logo-icon {
+                width: 56px;
+                height: 56px;
+            }
+
+            .main-menu,
+            .sub-menu {
+                font-size: 14px;
+            }
+
+            .cta-box {
+                font-size: 16px;
+                text-align: center;
+            }
+
+            /* 手機版選單樣式 */
+            .header-bar {
+                padding: 0;
+            }
+
+            .header-inner {
+                gap: 0;
+            }
+
+            .header-row-top,
+            .header-row-bottom {
+                display: none;
+            }
+
+            /* 手機版頂部圖示列 */
+            .mobile-header-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #ffffff;
+                padding: 8px 10px;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .mobile-icon-btn {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                color: #666;
+                background: none;
+                border: none;
+                cursor: pointer;
+            }
+
+            .mobile-logo {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                padding: 0 5px;
+            }
+
+            .mobile-logo img {
+                max-height: 66px;
+                height: auto;
+            }
+
+            /* 手機版導航列 */
+            .mobile-header-nav {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #fff;
+                padding: 12px 15px;
+                border-bottom: 2px solid #f17431;
+            }
+
+            .mobile-nav-breadcrumb {
+                font-size: 14px;
+                color: #333;
+                font-weight: 500;
+            }
+
+            .mobile-nav-search {
+                font-size: 14px;
+                color: #f17431;
+                font-weight: bold;
+                white-space: nowrap;
+            }
+        }
+
+        /* 桌面版隱藏手機版元素 */
+        @media (min-width: 641px) {
+            .mobile-header-top,
+            .mobile-header-nav {
+                display: none;
+            }
+        }
+
+        /* 手機版側邊選單 */
+        .mobile-sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: #f9b233;
+            z-index: 9999;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-sidebar.active {
+            left: 0;
+        }
+
+        .mobile-sidebar-header {
+            padding: 20px 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .mobile-sidebar-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .mobile-sidebar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .mobile-sidebar-menu {
+            padding: 10px 0;
+        }
+
+        .mobile-sidebar-menu a {
+            display: block;
+            padding: 15px 20px;
+            color: black;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background 0.2s ease;
+        }
+
+        .mobile-sidebar-menu a:hover,
+        .mobile-sidebar-menu a:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (min-width: 641px) {
+            .mobile-sidebar,
+            .mobile-sidebar-overlay {
+                display: none !important;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 手機版側邊選單遮罩 -->
+    <div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay"></div>
+
+    <!-- 手機版側邊選單 -->
+    <aside class="mobile-sidebar" id="mobile-sidebar">
+        <div class="mobile-sidebar-header">
+            <h2 class="mobile-sidebar-title">精選套票</h2>
+            <button class="mobile-sidebar-close" id="mobile-sidebar-close" aria-label="關閉選單">
+                −
+            </button>
+        </div>
+        <nav class="mobile-sidebar-menu">
+            <a href="#">馬爾代夫專門店</a>
+            <a href="#">海外婚禮及攝影</a>
+            <a href="#">主題 / 深度遊</a>
+            <a href="#">A+酒店套票</a>
+            <a href="#">潛水旅遊及課程</a>
+        </nav>
+    </aside>
+
+    <div class="page-wrapper">
+        <!-- 頂部橘色區域，模仿截圖結構 -->
+        <header class="header-bar">
+            <!-- 手機版頂部圖示列 -->
+            <div class="mobile-header-top">
+                <button class="mobile-icon-btn" id="mobile-menu-btn" aria-label="選單">
+                    ☰
+                </button>
+                <button class="mobile-icon-btn" aria-label="電話">
+                    ☎
+                </button>
+                <div class="mobile-logo">
+                    <a href="{% url 'homepage:home' %}">
+                        <img src="https://www.sunnseaholidays.com/img/logo.jpg?v=20200427" alt="尚熹之旅">
+                    </a>
+                </div>
+                <button class="mobile-icon-btn" aria-label="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </button>
+                <button class="mobile-icon-btn" aria-label="Facebook">
+                    f
+                </button>
+                <button class="mobile-icon-btn" aria-label="搜尋">
+                    🔍
+                </button>
+            </div>
+
+            <!-- 手機版導航列 -->
+            <div class="mobile-header-nav">
+                <div class="mobile-nav-breadcrumb">
+                    主題 / 深度遊 / 中國
+                </div>
+                <a href="#" class="mobile-nav-search">
+                    進階搜尋 &gt;&gt;
+                </a>
+            </div>
+
+            <div class="header-inner">
+                <!-- 上排：Logo + 主選單 + 搜尋 / 語言 -->
+                <div class="header-row-top">
+                    <div class="header-box header-logo-box">
+                        <div class="logo-placeholder">
+                            <a href="{% url 'homepage:home' %}">
+                                <img class="logo-img" src="https://www.sunnseaholidays.com/img/logo.jpg?v=20200427" alt="尚熹之旅 Sun n Sea Holidays">
+                            </a>
+                        </div>
+                    </div>
+                    <nav class="header-box main-menu">
+                        <a href="#">馬爾代夫專門店</a>
+                        <a href="#">潛水旅遊及課程</a>
+                        <a href="#">海外婚禮及攝影</a>
+                        <a href="#">主題 / 深度遊</a>
+                        <a href="#">A+酒店套票</a>
+                    </nav>
+                    <div class="header-box right-top-box">
+                        <div class="right-top-cell">🔍</div>
+                        <div class="right-top-cell">Eng</div>
+                    </div>
+                </div>
+
+                <!-- 下排：次選單 + CTA + 社群圖示 -->
+                <div class="header-row-bottom">
+                    <div class="header-box">
+                        <div class="sub-menu">
+                            <a href="#">尚熹網誌</a>
+                            <a href="#">媒體報導</a>
+                            <span class="phone-box">
+                                <span class="phone-icon">☎</span>
+                                <span>2926 1668 (旺角)</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="header-box cta-box">
+                        <span>免費取得最新旅遊資訊</span>
+                    </div>
+                    <div class="header-box social-box">
+                        <div class="social-item">
+                            <div class="social-icon-circle">W</div>
+                        </div>
+                        <div class="social-item">
+                            <div class="social-icon-circle">f</div>
+                        </div>
+                        <div class="social-item">
+                            <div class="social-icon-circle">IG</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% if hero_slides %}
+        <div class="hero-carousel" data-slide-count="{{ hero_slides|length }}">
+            <div class="hero-carousel-track">
+                {% for slide in hero_slides %}
+                <a class="hero-slide" {% if slide.link_url %}href="{{ slide.link_url }}"{% endif %}>
+                    {% if slide.image %}
+                    <img src="{{ slide.image.url }}" alt="{{ slide.title|default:'Hero 圖片' }}">
+                    {% endif %}
+                    {% if slide.title %}
+                    <div class="hero-slide-caption">
+                        {{ slide.title }}
+                    </div>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+
+            {% if hero_slides|length > 1 %}
+            <button class="hero-nav prev" type="button">&#10094;</button>
+            <button class="hero-nav next" type="button">&#10095;</button>
+            <div class="hero-dots">
+                {% for slide in hero_slides %}
+                <button class="hero-dot{% if forloop.first %} active{% endif %}" type="button" data-index="{{ forloop.counter0 }}"></button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- 內頁主要內容白底區 -->
+        <main class="content-wrapper">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
+
+<script>
+// 手機版側邊選單控制
+(function () {
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('mobile-sidebar');
+    const overlay = document.getElementById('mobile-sidebar-overlay');
+    const closeBtn = document.getElementById('mobile-sidebar-close');
+
+    if (!menuBtn || !sidebar || !overlay) return;
+
+    // 打開選單
+    function openSidebar() {
+        sidebar.classList.add('active');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // 防止背景滾動
+    }
+
+    // 關閉選單
+    function closeSidebar() {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = ''; // 恢復滾動
+    }
+
+    // 點擊漢堡選單按鈕
+    menuBtn.addEventListener('click', openSidebar);
+
+    // 點擊關閉按鈕
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeSidebar);
+    }
+
+    // 點擊遮罩關閉
+    overlay.addEventListener('click', closeSidebar);
+
+    // 點擊選單項目後關閉（可選）
+    const menuLinks = sidebar.querySelectorAll('.mobile-sidebar-menu a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', closeSidebar);
+    });
+})();
+
+// 簡易 Hero 輪播（只在有 hero-carousel 的頁面啟動）
+(function () {
+    const carousel = document.querySelector('.hero-carousel');
+    if (!carousel) return;
+
+    const track = carousel.querySelector('.hero-carousel-track');
+    const slides = carousel.querySelectorAll('.hero-slide');
+    const dots = carousel.querySelectorAll('.hero-dot');
+    const prevBtn = carousel.querySelector('.hero-nav.prev');
+    const nextBtn = carousel.querySelector('.hero-nav.next');
+
+    if (!slides.length) return;
+
+    let index = 0;
+
+    function goTo(i) {
+        index = (i + slides.length) % slides.length;
+        track.style.transform = 'translateX(' + (-index * 100) + '%)';
+        if (dots.length) {
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === index);
+            });
+        }
+    }
+
+    if (prevBtn && nextBtn && slides.length > 1) {
+        prevBtn.addEventListener('click', function () {
+            goTo(index - 1);
+        });
+        nextBtn.addEventListener('click', function () {
+            goTo(index + 1);
+        });
+    }
+
+    if (dots.length > 1) {
+        dots.forEach(function (dot) {
+            dot.addEventListener('click', function () {
+                const i = parseInt(dot.getAttribute('data-index') || '0', 10);
+                goTo(i);
+            });
+        });
+    }
+
+    // 自動輪播
+    if (slides.length > 1) {
+        setInterval(function () {
+            goTo(index + 1);
+        }, 7000);
+    }
+})();
+</script>

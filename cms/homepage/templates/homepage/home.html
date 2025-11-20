@@ -1,0 +1,419 @@
+{% extends 'main/base.html' %}
+
+{% block title %}首頁 - 潛水套票管理系統{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        text-align: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        margin-bottom: 40px;
+        color: white;
+    }
+    
+    .hero-section h1 {
+        font-size: 3em;
+        margin-bottom: 20px;
+    }
+    
+    .hero-section p {
+        font-size: 1.3em;
+        opacity: 0.9;
+    }
+    
+    .section-title {
+        font-size: 2em;
+        color: #333;
+        margin-bottom: 30px;
+        text-align: center;
+        font-weight: bold;
+    }
+    
+    .continent-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 50px;
+    }
+    
+    .continent-card {
+        background: linear-gradient(135deg, #fbb700 0%, #f59e0b 100%);
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-decoration: none;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .continent-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(251, 183, 0, 0.4);
+    }
+    
+    .continent-card h3 {
+        font-size: 1.8em;
+        margin-bottom: 10px;
+    }
+    
+    .continent-card p {
+        font-size: 1em;
+        opacity: 0.9;
+    }
+    
+    .package-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+    
+    .package-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .package-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .package-image {
+        width: 100%;
+        aspect-ratio: 21 / 9;
+        height: auto;
+        object-fit: cover;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: block;
+    }
+    
+    .package-body {
+        padding: 20px;
+    }
+    
+    .package-title {
+        font-size: 1.5em;
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    
+    .package-location {
+        color: #666;
+        margin-bottom: 10px;
+        font-size: 0.9em;
+    }
+    
+    .package-price {
+        color: #fbb700;
+        font-size: 1.3em;
+        font-weight: bold;
+        margin-top: 15px;
+    }
+    
+    .view-all-link {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .secondary-featured-section {
+        margin-top: 60px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .secondary-package-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+    }
+
+    .secondary-card {
+        border: none;
+        border-radius: 0;
+        overflow: hidden;
+        transition: all 0.3s;
+        background: white;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .secondary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .secondary-image-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .secondary-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .secondary-image-placeholder {
+        background: linear-gradient(135deg, #fbb700 0%, #f89c00 100%);
+    }
+
+    .secondary-tags {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 2;
+    }
+
+    .secondary-tag {
+        background: #fff;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-weight: 600;
+        font-size: 0.85em;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .secondary-banner {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffd700;
+        color: #333;
+        text-align: center;
+        font-weight: 700;
+        padding: 12px 16px;
+        letter-spacing: 1px;
+        font-size: 1em;
+    }
+
+    .secondary-body {
+        padding: 20px;
+        background: white;
+        position: relative;
+    }
+
+    .secondary-title {
+        font-size: 1.4em;
+        color: #f17431;
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 1.3;
+    }
+
+    .secondary-city-route {
+        text-align: center;
+        color: #555;
+        font-size: 0.95em;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    .secondary-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .secondary-price {
+        font-weight: 800;
+        font-size: 1.1em;
+        color: #1b1b1b;
+        white-space: nowrap;
+    }
+
+    .secondary-btn {
+        display: inline-block;
+        padding: 10px 16px;
+        background: #fbb700;
+        color: #333;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95em;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .secondary-btn:hover {
+        background: #f89c00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section h1 {
+            font-size: 2em;
+        }
+        
+        .hero-section p {
+            font-size: 1em;
+        }
+        
+        .package-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .continent-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .secondary-package-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .secondary-image {
+            height: 200px;
+        }
+
+        .secondary-body {
+            padding: 12px;
+        }
+
+        .secondary-title {
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+
+        .secondary-city-route {
+            font-size: 0.85em;
+        }
+
+        .secondary-footer {
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .secondary-price {
+            font-size: 0.95em;
+        }
+
+        .secondary-btn {
+            padding: 8px 12px;
+            font-size: 0.9em;
+            border-radius: 6px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 熱門套票區域 -->
+<div class="packages-section">
+    <h2 class="section-title">熱門潛水套票</h2>
+    <div class="package-grid">
+        {% for package in packages %}
+        <a href="{% url 'main:package_detail' package.city.country.continent.slug package.city.country.slug package.city.slug package.slug %}" class="package-card">
+            {% if package.main_image %}
+            <img src="{{ package.main_image.url }}" alt="{{ package.name }}" class="package-image">
+            {% else %}
+            <div class="package-image"></div>
+            {% endif %}
+            <div class="package-body">
+                <div class="package-title">{{ package.name }}</div>
+                {% if package.subtitle %}
+                <div class="package-location">{{ package.subtitle }}</div>
+                {% endif %}
+                <div class="package-location">
+                    📍 {{ package.city.name }}, {{ package.city.country.name }}
+                </div>
+                {% if package.price %}
+                <div class="package-price">NT$ {{ package.price|floatformat:0 }}</div>
+                {% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <div class="alert alert-info">
+            目前沒有可用的套票
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if packages %}
+    <div class="view-all-link">
+        <a href="{% url 'main:package_list' %}" class="btn">查看所有套票</a>
+    </div>
+    {% endif %}
+</div>
+{% if secondary_featured_packages %}
+<div class="secondary-featured-section">
+    <h2 class="section-title">次要精選套票</h2>
+    <div class="secondary-package-grid">
+        {% for package in secondary_featured_packages %}
+        <div class="secondary-card">
+            <div class="secondary-image-wrapper">
+                {% if package.main_image %}
+                <img src="{{ package.main_image.url }}" alt="{{ package.name }}" class="secondary-image">
+                {% else %}
+                <div class="secondary-image secondary-image-placeholder"></div>
+                {% endif %}
+                
+                {% if package.city %}
+                <div class="secondary-tags">
+                    <span class="secondary-tag">{{ package.city.name }}</span>
+                </div>
+                {% endif %}
+                
+                {% if package.subtitle %}
+                <div class="secondary-banner">
+                    {{ package.subtitle }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="secondary-body">
+                <h3 class="secondary-title">{{ package.name }}</h3>
+                
+                {% if package.city %}
+                <div class="secondary-city-route">{{ package.city.name }}</div>
+                {% endif %}
+                
+                <div class="secondary-footer">
+                    {% if package.city and package.city.country and package.city.country.continent and package.city.country.continent.slug and package.city.country.slug and package.city.slug and package.slug %}
+                    <a href="{% url 'main:package_detail' package.city.country.continent.slug package.city.country.slug package.city.slug package.slug %}" class="secondary-btn">
+                        查看詳情 →
+                    </a>
+                    {% else %}
+                    <a href="#" class="secondary-btn" style="opacity: 0.5;" title="此套票缺少必要的 slug 資訊" tabindex="-1">
+                        查看詳情 →
+                    </a>
+                    {% endif %}
+                    
+                    {% if package.price %}
+                    <div class="secondary-price">{{ package.price }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

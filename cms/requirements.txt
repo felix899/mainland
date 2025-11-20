@@ -1,0 +1,31 @@
+# Django 核心框架
+Django==4.2.7
+
+# 圖片處理
+Pillow==10.4.0
+
+# 圖片縮圖功能
+easy-thumbnails==2.10
+
+# 檔案管理系統
+django-filer==3.2.3
+
+# 樹狀結構支援 (django-filer 依賴)
+django-mptt==0.16.0
+
+# 巢狀內聯管理
+django-nested-admin==4.0.2
+
+# 富文本編輯器
+django-ckeditor==6.7.1
+
+# 資料庫支援
+sqlparse==0.5.1
+
+# 多型模型支援
+django-polymorphic==3.1.0
+
+# 其他必要套件
+python-monkey-business==1.0.0
+django-js-asset==2.1.0
+python-dotenv==1.0.0

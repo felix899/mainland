@@ -1,0 +1,285 @@
+{% extends 'main/base.html' %}
+
+{% block title %}套票列表 - 潛水套票管理系統{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats {
+        background: linear-gradient(135deg, #fbb700 0%, #f89c00 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .stats h2 {
+        font-size: 2em;
+        margin-bottom: 5px;
+    }
+    
+    .package-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+    }
+    
+    /* 木質祈願牌風格的卡片 */
+    .package-card {
+        border: none;
+        border-radius: 0px;
+        overflow: hidden;
+        transition: all 0.3s;
+        background: white
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .package-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    
+    .package-image-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .package-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        display: block;
+    }
+    
+    /* 右上角圓角標籤（國家和大陸） */
+    .image-tags {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 2;
+    }
+    
+    .image-tag {
+        background: #fff;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-weight: 600;
+        font-size: 0.85em;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        white-space: nowrap;
+        pointer-events: none;
+    }
+    
+    /* 底部黃色橫幅（套票類型） */
+    .image-banner {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffd700;
+        color: #333;
+        text-align: center;
+        font-weight: 700;
+        padding: 12px 16px;
+        letter-spacing: 1px;
+        font-size: 1em;
+    }
+    
+    .package-body {
+        padding: 20px;
+        background: white;
+        position: relative;
+    }
+    
+    .package-title {
+        font-size: 1.4em;
+        color: #f17431;
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 1.3;
+    }
+    
+    /* 城市路線（如「昆明-大理-麗江」） */
+    .city-route {
+        text-align: center;
+        color: #555;
+        font-size: 0.95em;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+    
+    .package-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    /* 右下角價格 */
+    .package-price {
+        font-weight: 800;
+        font-size: 1.1em;
+        color: #1b1b1b;
+        white-space: nowrap;
+    }
+    
+    /* 按鈕樣式 */
+    .btn {
+        display: inline-block;
+        padding: 10px 16px;
+        background: #fbb700;
+        color: #333;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95em;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn:hover {
+        background: #f89c00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .btn-secondary {
+        background: #666;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #555;
+    }
+    
+    .no-packages {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+    
+    .no-packages-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+    }
+    
+    /* 手機版樣式 */
+    @media (max-width: 768px) {
+        .content { padding: 12px; border-radius: 12px; }
+        .stats { padding: 12px; border-radius: 8px; }
+        .stats h2 { font-size: 1.2em; }
+        .package-grid { 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            margin-top: 12px; 
+        }
+        .package-card { border-radius: 10px; }
+        .package-image { height: 180px; }
+        .image-tag { 
+            padding: 4px 10px; 
+            font-size: 0.7em; 
+        }
+        .image-banner { 
+            padding: 8px 10px; 
+            font-size: 0.85em; 
+        }
+        .package-body { padding: 12px; }
+        .package-title { font-size: 1em; margin-bottom: 8px; }
+        .city-route { font-size: 0.8em; margin-bottom: 12px; }
+        .package-footer { 
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .package-price { font-size: 0.95em; }
+        .btn { padding: 8px 12px; font-size: 0.9em; border-radius: 6px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stats">
+    <h2>共有 {{ total_count }} 個套票</h2>
+    <p>目前啟用的套票數量</p>
+</div>
+
+{% if packages %}
+    <div class="package-grid">
+        {% for package in packages %}
+        <div class="package-card">
+            <div class="package-image-wrapper">
+                {% if package.main_image %}
+                    <img src="{{ package.main_image.url }}" alt="{{ package.name }}" class="package-image">
+                {% else %}
+                    <div class="package-image"></div>
+                {% endif %}
+                
+                <!-- 右上角標籤（城市） -->
+                {% if package.city %}
+                <div class="image-tags">
+                    <span class="image-tag">{{ package.city.name }}</span>
+                </div>
+                {% endif %}
+                
+                <!-- 底部黃色橫幅（副標題） -->
+                {% if package.subtitle %}
+                <div class="image-banner">
+                    {{ package.subtitle }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="package-body">
+                <!-- 套票名稱 -->
+                <h3 class="package-title">{{ package.name }}</h3>
+                
+                <!-- 城市路線 -->
+                {% if package.city %}
+                    <div class="city-route">{{ package.city.name }}</div>
+                {% endif %}
+                
+                <!-- 底部：價格和詳情按鈕 -->
+                <div class="package-footer">
+                    {% if package.city and package.city.country and package.city.country.continent and package.city.country.continent.slug and package.city.country.slug and package.city.slug and package.slug %}
+                        <a href="{% url 'main:package_detail' package.city.country.continent.slug package.city.country.slug package.city.slug package.slug %}" class="btn">
+                            查看詳情 →
+                        </a>
+                    {% else %}
+                        <a href="#" class="btn" style="opacity: 0.5;" title="此套票缺少必要的 slug 資訊">
+                            查看詳情 →
+                        </a>
+                    {% endif %}
+                    {% if package.price %}
+                        <div class="package-price">{{ package.price }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="no-packages">
+        <div class="no-packages-icon">📦</div>
+        <h3>目前沒有任何套票</h3>
+        <p>請到管理後台新增套票</p>
+        <br>
+        <a href="/admin/main/package/add/" class="btn">新增套票</a>
+    </div>
+{% endif %}
+
+<div style="margin-top: 30px; text-align: center;">
+    <a href="/admin/" class="btn btn-secondary">返回管理後台</a>
+</div>
+{% endblock %}
+
