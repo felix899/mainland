@@ -236,6 +236,12 @@ class Package(models.Model):
     slug = models.SlugField(max_length=200, verbose_name="URL 代碼", help_text="用於 URL 的英文代碼，例如：beginner-diving-course", blank=True)
     subtitle = models.CharField(max_length=300, verbose_name="副標題", blank=True)
     description = RichTextUploadingField(verbose_name="套票描述", config_name='default')
+    ai_prompt_description = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="AI 提示詞（描述）",
+        help_text="輸入提示詞讓 AI 自動生成套票描述"
+    )
     price = models.CharField(max_length=100, verbose_name="套票價格", blank=True, null=True)
     
     # 套票詳細資訊

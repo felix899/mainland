@@ -1,11 +1,29 @@
+import json
+
 from django.contrib import admin
 import nested_admin
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import path, reverse
 from django.utils.html import format_html
-from django.http import HttpResponseRedirect
-from .models import Continent, Country, City, PackageType, PackageTag, Package, Period, Hotel, RoomType, RoomPrice, RoomImage, DailyItinerary, ItineraryImage
+from django.http import HttpResponseRedirect, JsonResponse
+
+from .models import (
+    Continent,
+    Country,
+    City,
+    PackageType,
+    PackageTag,
+    Package,
+    Period,
+    Hotel,
+    RoomType,
+    RoomPrice,
+    RoomImage,
+    DailyItinerary,
+    ItineraryImage,
+)
+from .utils import generate_content_with_perplexity
 
 # Register your models here.
 
@@ -69,6 +87,7 @@ class PackageTagAdmin(admin.ModelAdmin):
 @admin.register(Package)
 class PackageAdmin(nested_admin.NestedModelAdmin):
     """套票管理界面"""
+    change_form_template = "admin/main/package/change_form.html"
     list_display = ['name', 'slug', 'city', 'package_type', 'price', 'is_active', 'is_featured', 'is_secondary_featured', 'created_at', 'copy_package_link']
     list_filter = ['city__country__continent', 'city__country', 'city', 'package_type', 'is_active', 'is_featured', 'is_secondary_featured', 'created_at']
     search_fields = ['name', 'slug', 'subtitle', 'package_type__name', 'city__name', 'city__country__name']
@@ -81,7 +100,7 @@ class PackageAdmin(nested_admin.NestedModelAdmin):
     
     fieldsets = (
         ('基本資訊', {
-            'fields': ('city', 'package_type', 'name', 'slug', 'subtitle', 'description', 'price')
+            'fields': ('city', 'package_type', 'name', 'slug', 'subtitle', 'ai_prompt_description', 'description', 'price')
         }),
         ('圖片', {
             'fields': ('main_image',)
@@ -148,7 +167,16 @@ class PackageAdmin(nested_admin.NestedModelAdmin):
         """添加自定義URL"""
         urls = super().get_urls()
         custom_urls = [
-            path('<int:package_id>/copy/', self.admin_site.admin_view(self.copy_package_view), name='main_package_copy'),
+            path(
+                '<int:package_id>/copy/',
+                self.admin_site.admin_view(self.copy_package_view),
+                name='main_package_copy',
+            ),
+            path(
+                '<int:package_id>/generate-ai-description/',
+                self.admin_site.admin_view(self.generate_ai_description_view),
+                name='main_package_generate_ai_description',
+            ),
         ]
         return custom_urls + urls
     
@@ -165,6 +193,62 @@ class PackageAdmin(nested_admin.NestedModelAdmin):
         except Exception as e:
             self.message_user(request, f'複製套票時發生錯誤: {str(e)}', level=messages.ERROR)
             return HttpResponseRedirect(reverse('admin:main_package_changelist'))
+
+    def generate_ai_description_view(self, request, package_id):
+        """
+        處理 AI 自動生成套票描述的請求
+
+        參考舊專案 sns.PackageAdmin.generate_ai_description_view 的行為，
+        但改為使用 main.utils.generate_content_with_perplexity，並將詳細錯誤訊息回傳前端。
+        """
+        if request.method != 'POST':
+            return JsonResponse({'success': False, 'error': '只接受 POST 請求'}, status=405)
+
+        try:
+            package = Package.objects.get(pk=package_id)
+        except Package.DoesNotExist:
+            return JsonResponse({'success': False, 'error': '找不到指定的套票'}, status=404)
+
+        try:
+            if request.body:
+                data = json.loads(request.body)
+                ai_prompt = (data.get('ai_prompt') or '').strip()
+            else:
+                return JsonResponse(
+                    {'success': False, 'error': '請求資料為空'},
+                    status=400,
+                )
+        except json.JSONDecodeError as e:
+            return JsonResponse(
+                {'success': False, 'error': f'無效的請求資料格式：{str(e)}'},
+                status=400,
+            )
+
+        if not ai_prompt:
+            return JsonResponse(
+                {'success': False, 'error': '請先輸入 AI 提示詞'},
+                status=400,
+            )
+
+        # 呼叫 Perplexity API
+        generated_content, error = generate_content_with_perplexity(ai_prompt)
+
+        if generated_content:
+            package.description = generated_content
+            package.save()
+            return JsonResponse(
+                {'success': True, 'content': generated_content},
+                status=200,
+            )
+
+        # 失敗時將詳細錯誤訊息帶回前端，方便除錯
+        return JsonResponse(
+            {
+                'success': False,
+                'error': error or 'AI 生成內容失敗，請檢查 API 設定或稍後再試',
+            },
+            status=500,
+        )
 
 
 # ========== 嵌套 Inline 配置 ==========

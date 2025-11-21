@@ -284,3 +284,13 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # 使用自訂網域作為媒體網址（可依需求改成 AWS_S3_WEBSITE_ENDPOINT）
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+
+# =========================
+# Perplexity AI 設定
+# =========================
+# 務必只透過環境變數或 .env 提供金鑰，避免被 GitHub 視為外洩：
+# PERPLEXITY_API_KEY=你的API金鑰
+# PERPLEXITY_MODEL=目前可用的模型 ID（例如：gpt-4.1-mini）
+PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY', '')
+PERPLEXITY_MODEL = os.environ.get('PERPLEXITY_MODEL', 'gpt-4.1-mini')
+

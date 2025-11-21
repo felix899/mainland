@@ -1,0 +1,103 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{# 參考舊專案 sns 的自訂 change_form，這裡只在頁面底部加上一個 AI 幫手區塊 #}
+
+{% block after_related_objects %}
+    {{ block.super }}
+
+    {% if original %}
+    <div class="module aligned" id="ai-description-helper" style="margin-top: 20px;">
+        <h2>🤖 AI 內容生成助手</h2>
+        <p>
+            在上方的「<strong>AI 提示詞（描述）</strong>」欄位中輸入提示詞，然後點擊下方按鈕，<br>
+            系統會透過 Perplexity AI 自動為此套票產生「套票描述」內容。
+        </p>
+        <div style="margin: 10px 0;">
+            <button type="button" class="button default" id="generate-ai-description-btn">
+                生成 AI 內容
+            </button>
+            <span id="generate-ai-description-status" style="margin-left: 10px; font-weight: bold;"></span>
+        </div>
+        <p style="color: #666; font-size: 12px;">
+            提醒：AI 生成的內容會直接覆蓋「套票描述」欄位，請在儲存前先確認內容是否需要手動調整。
+        </p>
+    </div>
+
+    <script>
+        (function() {
+            const btn = document.getElementById('generate-ai-description-btn');
+            const statusEl = document.getElementById('generate-ai-description-status');
+
+            if (!btn) {
+                return;
+            }
+
+            btn.addEventListener('click', function() {
+                statusEl.style.color = '#333';
+                statusEl.textContent = '正在向 AI 取得內容，請稍候...';
+
+                // 取得 AI 提示詞欄位（id 依照 Django admin 的命名規則）
+                const promptField = document.getElementById('id_ai_prompt_description');
+                if (!promptField || !promptField.value.trim()) {
+                    statusEl.style.color = 'red';
+                    statusEl.textContent = '請先在「AI 提示詞（描述）」欄位輸入內容。';
+                    return;
+                }
+
+                const prompt = promptField.value.trim();
+
+                // 取得當前頁面的 URL，組出 generate-ai-description API 位址
+                // 目前 change 頁面路徑類似：/admin/main/package/<id>/change/
+                const pathParts = window.location.pathname.split('/').filter(Boolean);
+                const pkIndex = pathParts.indexOf('package') + 1;
+                const packageId = pathParts[pkIndex];
+
+                const url = `/admin/main/package/${packageId}/generate-ai-description/`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': (function() {
+                            const name = 'csrftoken';
+                            const cookies = document.cookie.split(';');
+                            for (let i = 0; i < cookies.length; i++) {
+                                const cookie = cookies[i].trim();
+                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                    return decodeURIComponent(cookie.substring(name.length + 1));
+                                }
+                            }
+                            return '';
+                        })()
+                    },
+                    body: JSON.stringify({ai_prompt: prompt})
+                }).then(function(response) {
+                    return response.json();
+                }).then(function(data) {
+                    if (data.success) {
+                        // 尋找 description 對應的 CKEditor 或 textarea
+                        const descTextarea = document.getElementById('id_description');
+                        if (window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances['id_description']) {
+                            CKEDITOR.instances['id_description'].setData(data.content || '');
+                        } else if (descTextarea) {
+                            descTextarea.value = data.content || '';
+                        }
+                        statusEl.style.color = 'green';
+                        statusEl.textContent = 'AI 內容生成成功，已填入「套票描述」欄位，請確認後再儲存。';
+                    } else {
+                        statusEl.style.color = 'red';
+                        statusEl.textContent = data.error || 'AI 生成內容失敗，請稍後再試。';
+                    }
+                }).catch(function(error) {
+                    console.error('AI 內容生成錯誤:', error);
+                    statusEl.style.color = 'red';
+                    statusEl.textContent = '發生錯誤，無法取得 AI 內容。';
+                });
+            });
+        })();
+    </script>
+    {% endif %}
+{% endblock %}
+
+
